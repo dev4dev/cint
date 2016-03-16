@@ -97,9 +97,9 @@ end
 
 class Xcodeproj::Project::Object::PBXShellScriptBuildPhase
   def setup_with_frameworks(frameworks)
-    shell_script = "/usr/local/bin/carthage copy-frameworks"
-    shell_path = "/bin/sh"
-    input_paths = frameworks
+    self.shell_script = "/usr/local/bin/carthage copy-frameworks"
+    self.shell_path = "/bin/sh"
+    self.input_paths = frameworks
   end
 end
 
