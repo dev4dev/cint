@@ -44,8 +44,6 @@ end
 
 # Project
 class Project
-  attr_reader :project
-  
   def initialize(project_name)
     begin
       @project = Xcodeproj::Project.open(project_name)
