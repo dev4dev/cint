@@ -8,7 +8,7 @@ require 'commander/import'
 program :name, 'integrator'
 program :version, '0.0.1'
 program :description, 'Integrates Carthage Frameworks'
-program :author, 'Alex antonyuk'
+program :help, 'Author', 'Alex Antonyuk <alex@antonyuk.me>'
 
 def error(message)
   puts "\nError: #{message}".red
