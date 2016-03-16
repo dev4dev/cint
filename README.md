@@ -1,6 +1,6 @@
 ### CINT - Carthage INTegrator
 
-Simplifies all routings with adding Framworks into a project and creating Shell Script Build Phase
+Simplifies all routines with adding Frameworks into a project and creating Shell Script Build Phase
 
 ### Install
 1. Clone repo
