@@ -11,7 +11,12 @@ program :description, 'Integrates Carthage Frameworks'
 program :author, 'Alex antonyuk'
 
 def error(message)
-  puts "Error: #{message}".red
+  puts "\nError: #{message}".red
+  exit
+end
+
+def warning(message)
+  puts "\nWarning: #{message}".yellow
   exit
 end
 
@@ -37,14 +42,7 @@ class CarthageFiles
   end
 end
 
-def check_carthage
-  unless CarthageFiles.exists
-    error 'Carthage build folder does not exists'
-  end
-end
-
 # Project
-
 class Project
   attr_reader :project
   
@@ -87,17 +85,21 @@ class Project
   end
 end
 
-def carthage_build_phase_from_target(target)
-  phase = target.build_phases.select do |phase|
-    phase.is_a?(Xcodeproj::Project::Object::PBXShellScriptBuildPhase) && phase.name == "Carthage"
-  end.first
-  phase || target.new_shell_script_build_phase("Carthage")
+class Xcodeproj::Project::Object::PBXNativeTarget
+  def carthage_build_phase
+    phase = build_phases.select do |phase|
+      phase.is_a?(Xcodeproj::Project::Object::PBXShellScriptBuildPhase) && phase.name == "Carthage"
+    end.first
+    phase || new_shell_script_build_phase("Carthage")
+  end
 end
 
-def setup_phase(phase, frameworks)
-  phase.shell_script = "/usr/local/bin/carthage copy-frameworks"
-  phase.shell_path = "/bin/sh"
-  phase.input_paths = frameworks
+class Xcodeproj::Project::Object::PBXShellScriptBuildPhase
+  def setup_with_frameworks(frameworks)
+    shell_script = "/usr/local/bin/carthage copy-frameworks"
+    shell_path = "/bin/sh"
+    input_paths = frameworks
+  end
 end
 
 def prepare_frameworks(frameworks)
@@ -111,11 +113,13 @@ def print_report(frameworks)
   say frameworks.map{|f| File.basename(f)}.join("\n").yellow
 end
 
+# Commands
 command :install do |c|
   c.syntax = 'cint install <project_name>'
   c.description = 'Adds frameworks build by Carthage into a project'
   c.action do |args, options|
-    check_carthage
+    error 'Carthage build folder does not exists' unless CarthageFiles.exists
+    
     project = Project.new(args[0])
     
     # choose target
@@ -124,11 +128,15 @@ command :install do |c|
     platform = SDK_TO_PLATFORM[target.sdk]
     frameworks = CarthageFiles.frameworks(platform)
     
+    warning 'No frameworks found' if frameworks.empty?
+    
     # Add Framework Files
     project.add_missing_frameworks_to_target(target, frameworks)
 
-    # Shell Script
-    setup_phase(carthage_build_phase_from_target(target), prepare_frameworks(frameworks))
+    # Integrate Shell Script
+    target.carthage_build_phase.setup_with_frameworks(prepare_frameworks(frameworks))
+    
+    # Save Project
     project.save
 
     # footer
