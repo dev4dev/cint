@@ -20,6 +20,10 @@ def warning(message)
   exit
 end
 
+def info(message)
+  puts message.green
+end
+
 SDK_TO_PLATFORM = {
   "iphoneos" => "iOS",
   "macosx" => "Mac",
@@ -37,8 +41,8 @@ class CarthageFiles
 
   def self.frameworks(platform)
     return [] unless PLATFORMS.include?(platform)
-    path = "./Carthage/Build/#{platform}/*.framework"
-    Dir.glob(path)
+    pattern = "./Carthage/Build/#{platform}/*.framework"
+    Dir.glob(pattern)
   end
 end
 
@@ -48,8 +52,7 @@ class Project
     begin
       @project = Xcodeproj::Project.open(project_name)
     rescue
-      p "oops"
-      exit
+      error "Project #{project_name} not found"
     end
   end
   
@@ -107,33 +110,55 @@ def prepare_frameworks(frameworks)
 end
 
 def print_report(frameworks)
-  say 'Integrated:'.green
-  say frameworks.map{|f| File.basename(f)}.join("\n").yellow
+  info 'Integrated:'
+  puts frameworks.map{|f| File.basename(f)}.join("\n").yellow
+end
+
+def find_project
+  pattern = Dir.pwd + "/*.xcodeproj"
+  Dir.glob(pattern)
+end
+
+def get_project_name(args)
+  if args.count == 0
+    projects = find_project
+    error "There are more than one project in the directory, pass project's name explicitly" if projects.count > 1
+    error "There are no projects in the directory, pass project's name explicitly" if projects.count == 0
+    project_name = projects.first
+  else
+    project_name = args[0]
+  end
+  project_name = "#{project_name}.xcodeproj" unless project_name.end_with? ".xcodeproj"
+  project_name
 end
 
 # Commands
 command :install do |c|
   c.syntax = 'cint install <project_name>'
-  c.description = 'Adds frameworks build by Carthage into a project'
+  c.description = 'Adds frameworks built by Carthage into a project'
   c.action do |args, options|
     error 'Carthage build folder does not exists' unless CarthageFiles.exists
     
-    project = Project.new(args[0])
+    # Choose Project
+    project_name = get_project_name(args)
+    info "Working with #{File.basename(project_name)}\n"
     
+    project = Project.new(project_name)
+
     # choose target
     choice = choose("Choose target:\n", *project.get_targets.map(&:name))
     target = project.target_by_name(choice)
     platform = SDK_TO_PLATFORM[target.sdk]
     frameworks = CarthageFiles.frameworks(platform)
-    
+
     warning 'No frameworks found' if frameworks.empty?
-    
+
     # Add Framework Files
     project.add_missing_frameworks_to_target(target, frameworks)
 
     # Integrate Shell Script
     target.carthage_build_phase.setup_with_frameworks(prepare_frameworks(frameworks))
-    
+
     # Save Project
     project.save
 
@@ -141,6 +166,6 @@ command :install do |c|
     say "\n"
     print_report(frameworks)
     say "\n"
-    say 'Done. Re-open Project'.green
+    info 'Done. Re-open Project'
   end
 end
