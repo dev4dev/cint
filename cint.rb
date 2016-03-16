@@ -157,7 +157,7 @@ command :install do |c|
     project.add_missing_frameworks_to_target(target, frameworks)
 
     # Integrate Shell Script
-    target.carthage_build_phase.setup_with_frameworks(prepare_frameworks(frameworks))
+    target.carthage_build_phase.setup_with_frameworks(prepare_frameworks(frameworks)) unless target.sdk == 'macosx'
 
     # Save Project
     project.save
