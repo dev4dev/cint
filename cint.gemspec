@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Alex Antonyuk"]
   spec.email         = ["alex@antonyuk.me"]
 
-  spec.summary       = %q{Simplifies all routines with adding Frameworks into a project and creating Shell Script Build Phase}
+  spec.summary       = %q{Simplifies all routines with adding Frameworks built with Carthage into a project and creating Shell Script Build Phase}
   spec.homepage      = "https://github.com/dev4dev/cint"
   spec.license       = "MIT"
 
