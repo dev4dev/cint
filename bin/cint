@@ -99,6 +99,20 @@ module Xcodeproj
           end
           cart_phase || new_shell_script_build_phase(BUILD_PHASE_NAME)
         end
+
+        def add_frameworks_search_path(path)
+          build_configuration_list.build_configurations.each do |cfg|
+            if cfg.build_settings['FRAMEWORK_SEARCH_PATHS'] && !cfg.build_settings['FRAMEWORK_SEARCH_PATHS'].include?(path)
+              if cfg.build_settings['FRAMEWORK_SEARCH_PATHS'].instance_of?(String)
+                cfg.build_settings['FRAMEWORK_SEARCH_PATHS'].concat(" #{path}")
+              else
+                cfg.build_settings['FRAMEWORK_SEARCH_PATHS'].push(path)
+              end
+            else
+              cfg.build_settings['FRAMEWORK_SEARCH_PATHS'] = ['$(inherited)', path]
+            end
+          end # end each
+        end
       end
 
       # Extends Build Phase
@@ -165,6 +179,10 @@ command :install do |c|
 
     # Add Framework Files
     project.add_missing_frameworks_to_target(target, frameworks)
+
+    # Add Frameworks Search Path (FRAMEWORK_SEARCH_PATHS)
+    fw_search_path = "$(PROJECT_DIR)/Carthage/Build/#{platform}"
+    target.add_frameworks_search_path(fw_search_path)
 
     # Integrate Shell Script
     phase = target.carthage_build_phase
