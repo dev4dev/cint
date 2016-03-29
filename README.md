@@ -1,6 +1,6 @@
 # CINT - Carthage INTegrator
 
-lifies all routines with adding Frameworks into a project and creating Shell Script Build Phase
+Simplifies all routines with adding Frameworks into a project and creating Shell Script Build Phase
 
 ## Installation
 
