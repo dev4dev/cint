@@ -22,7 +22,9 @@ module Cint
       fs -= target.frameworks_build_phase.files.map { |f| f.file_ref.path }
 
       files = fs.map do |f|
-        @project.frameworks_group.new_file(f)
+        file = @project.frameworks_group.files.find { |ff| ff.path == f}
+        file = @project.frameworks_group.new_file(f) if file.nil?
+        file
       end
 
       files.each do |f|
