@@ -16,6 +16,10 @@ module Cint
     def target_by_name(name)
       @project.targets.find { |t| t.name == name }
     end
+    
+    def add_path(path)
+      @project.add_frameworks_search_path(path)
+    end
 
     def add_missing_frameworks_to_target(target, frameworks)
       fs = _fix_frameworks_paths(frameworks)

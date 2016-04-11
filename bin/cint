@@ -108,7 +108,7 @@ command :install do |c|
 
     # Add Frameworks Search Path (FRAMEWORK_SEARCH_PATHS)
     fw_search_path = "$(PROJECT_DIR)/Carthage/Build/#{platform}"
-    target.add_frameworks_search_path(fw_search_path)
+    project.add_path(fw_search_path)
 
     # Integrate Shell Script
     phase = target.carthage_build_phase
