@@ -25,15 +25,22 @@ module Cint
       fs = _fix_frameworks_paths(frameworks)
       fs -= target.frameworks_build_phase.files.map { |f| f.file_ref.path }
 
+      added_frameworks = []
       files = fs.map do |f|
         file = @project.frameworks_group.files.find { |ff| ff.path == f}
-        file = @project.frameworks_group.new_file(f) if file.nil?
+        if file.nil?
+          file = @project.frameworks_group.new_file(f) if file.nil?
+          added_frameworks << f
+        end
+        
         file
       end
 
       files.each do |f|
         target.frameworks_build_phase.add_file_reference(f)
       end
+      
+      return added_frameworks
     end
 
     def _fix_frameworks_paths(frameworks)

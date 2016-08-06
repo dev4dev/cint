@@ -11,7 +11,7 @@ require 'lib/xcodeproj'
 require 'lib/cint'
 
 program :name, 'integrator'
-program :version, '0.0.1'
+program :version, '0.1.6'
 program :description, 'Integrates Carthage Frameworks'
 program :help, 'Author', 'Alex Antonyuk <alex@antonyuk.me>'
 
@@ -59,9 +59,25 @@ def prepare_frameworks(frameworks)
   end
 end
 
-def print_report(frameworks)
+def print_report(target, all, integrated)
+  all.map! { |f| File.basename(f) }
+  integrated.map! { |f| File.basename(f) }
+  
+  puts "Target ".green + target.name.yellow
+  puts
+  
+  old = all - integrated
+  unless old.empty?
+    info 'Existed:'
+    puts old.join("\n").yellow
+  end
+  puts
   info 'Integrated:'
-  puts frameworks.map { |f| File.basename(f) }.join("\n").yellow
+  if integrated.empty?
+    puts 'None'.yellow
+  else
+    puts integrated.join("\n").yellow
+  end
 end
 
 def find_project
@@ -82,6 +98,33 @@ def get_project_name(args)
   project_name
 end
 
+def intergate_frameworks(target, project)
+  platform = SDK_TO_PLATFORM[target.sdk]
+  frameworks = CarthageFiles.frameworks(platform)
+
+  if frameworks.empty?
+    warning 'No frameworks found'
+    return
+  end
+
+  # Add Framework Files
+  added_frameworks = project.add_missing_frameworks_to_target(target, frameworks)
+
+  # Add Frameworks Search Path (FRAMEWORK_SEARCH_PATHS)
+  fw_search_path = "$(PROJECT_DIR)/Carthage/Build/#{platform}"
+  project.add_path(fw_search_path)
+
+  # Integrate Shell Script
+  phase = target.carthage_build_phase
+  prepared_frameworks = prepare_frameworks(frameworks)
+  phase.setup_with_frameworks(prepared_frameworks) unless target.sdk == 'macosx'
+  
+  # footer
+  say "\n"
+  print_report(target, frameworks, added_frameworks)
+  say "\n"
+end
+
 # Commands
 command :install do |c|
   c.syntax = 'cint install <project_name>'
@@ -98,30 +141,13 @@ command :install do |c|
     # choose target
     choice = choose("Choose target:\n", *project.targets.map(&:name))
     target = project.target_by_name(choice)
-    platform = SDK_TO_PLATFORM[target.sdk]
-    frameworks = CarthageFiles.frameworks(platform)
-
-    warning 'No frameworks found' if frameworks.empty?
-
-    # Add Framework Files
-    project.add_missing_frameworks_to_target(target, frameworks)
-
-    # Add Frameworks Search Path (FRAMEWORK_SEARCH_PATHS)
-    fw_search_path = "$(PROJECT_DIR)/Carthage/Build/#{platform}"
-    project.add_path(fw_search_path)
-
-    # Integrate Shell Script
-    phase = target.carthage_build_phase
-    prepared_frameworks = prepare_frameworks(frameworks)
-    phase.setup_with_frameworks(prepared_frameworks) unless target.sdk == 'macosx'
-
+    
+    # integrate
+    intergate_frameworks(target, project)
+    
     # Save Project
     project.save
 
-    # footer
-    say "\n"
-    print_report(frameworks)
-    say "\n"
     info 'Done. Re-open Project'
   end
 end
