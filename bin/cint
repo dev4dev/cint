@@ -11,7 +11,7 @@ require 'lib/xcodeproj'
 require 'lib/cint'
 
 program :name, 'integrator'
-program :version, '0.1.6'
+program :version, Cint::VERSION
 program :description, 'Integrates Carthage Frameworks'
 program :help, 'Author', 'Alex Antonyuk <alex@antonyuk.me>'
 
