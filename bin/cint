@@ -10,7 +10,7 @@ require 'commander/import'
 require 'lib/xcodeproj'
 require 'lib/cint'
 
-program :name, 'integrator'
+program :name, 'Carthage Integrator'
 program :version, Cint::VERSION
 program :description, 'Integrates Carthage Frameworks'
 program :help, 'Author', 'Alex Antonyuk <alex@antonyuk.me>'
@@ -53,9 +53,16 @@ class CarthageFiles
   end
 end
 
-def prepare_frameworks(frameworks)
+def prepare_inputs(frameworks)
   frameworks.map do |f|
     "$(SRCROOT)#{f[1..-1]}"
+  end
+end
+
+def prepare_outputs(frameworks)
+  frameworks.map do |f|
+    name = f.split("/").last
+    "$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/#{name}"
   end
 end
 
@@ -116,8 +123,9 @@ def intergate_frameworks(target, project)
 
   # Integrate Shell Script
   phase = target.carthage_build_phase
-  prepared_frameworks = prepare_frameworks(frameworks)
-  phase.setup_with_frameworks(prepared_frameworks) unless target.sdk == 'macosx'
+  prepared_inputs = prepare_inputs(frameworks)
+  prepared_outputs = prepare_outputs(frameworks)
+  phase.setup_with_frameworks(prepared_inputs, prepared_outputs) unless target.sdk == 'macosx'
   
   # footer
   say "\n"

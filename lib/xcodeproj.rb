@@ -28,10 +28,11 @@ module Xcodeproj
 
       # Extends Build Phase
       class PBXShellScriptBuildPhase
-        def setup_with_frameworks(frameworks)
+        def setup_with_frameworks(input_paths, output_paths)
           self.shell_script = '/usr/local/bin/carthage copy-frameworks'
           self.shell_path = '/bin/sh'
-          self.input_paths = frameworks
+          self.input_paths = input_paths
+          self.output_paths = output_paths
         end
       end
     end
