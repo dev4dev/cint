@@ -15,6 +15,8 @@ program :version, Cint::VERSION
 program :description, 'Integrates Carthage Frameworks'
 program :help, 'Author', 'Alex Antonyuk <alex@antonyuk.me>'
 
+default_command :install
+
 def error(message)
   puts "\nError: #{message}".red
   exit
@@ -144,5 +146,35 @@ command :install do |c|
     project.save
 
     info 'Done. Re-open Project'
+  end
+end
+
+command :cleanup do |c|
+  c.syntax = 'cint cleanup [framework,...]'
+  c.description = 'Remove bcsymbolmap files for frameworks. If no parameters passed it will perform cleanup for every framework.'
+  
+  c.action do |args, _|
+    frameworks = Cint::Cleanup.frameworks
+    error "There are not a single framework found. Check directory, it should be ran in Build/* directory." if frameworks.empty?
+    if args.empty?
+      filtered_frameworks = frameworks
+    else
+      filtered_frameworks = frameworks.select do |framework|
+        name = File.basename(framework)
+        args.include?(name)
+      end
+    end
+    warning "Nothing to precess" if filtered_frameworks.empty?
+    
+    progress(filtered_frameworks) do |framework|
+      puts "Processing #{framework}...".green
+      Cint::Cleanup.bcsymbolmap(framework).each do |bcs|
+        if File.exists?(bcs)
+          print "\tRemoving #{bcs}".red
+          File.delete(bcs)
+        end
+        $stdout.flush
+      end
+    end
   end
 end
