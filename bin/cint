@@ -149,32 +149,55 @@ command :install do |c|
   end
 end
 
+def cleanup_orphaned_symbols(frameworks)
+  used_symbols = frameworks.flat_map do |framework|
+    Cint::Cleanup.bcsymbolmap(framework)
+  end
+  all = Cint::Cleanup.all_bcsymbolmap
+  orphans = all - used_symbols
+  
+  warning "There are no orphan symbols" if orphans.empty?
+  orphans.each_with_index do |symb, index|
+    puts "(#{index + 1}/#{orphans.count}) Removing #{symb}...".red
+    File.delete(symb)
+  end
+end
+
+def cleanup_symbols(frameworks, args)
+  if args.empty?
+    filtered_frameworks = frameworks
+  else
+    filtered_frameworks = frameworks.select do |framework|
+      name = File.basename(framework)
+      args.include?(name)
+    end
+  end
+  warning "Nothing to precess" if filtered_frameworks.empty?
+  
+  progress(filtered_frameworks) do |framework|
+    puts "Processing #{framework}...".green
+    Cint::Cleanup.bcsymbolmap(framework).each do |bcs|
+      if File.exists?(bcs)
+        print "\tRemoving #{bcs}".red
+        File.delete(bcs)
+      end
+      $stdout.flush
+    end
+  end
+end
+
 command :cleanup do |c|
   c.syntax = 'cint cleanup [framework,...]'
   c.description = 'Remove bcsymbolmap files for frameworks. If no parameters passed it will perform cleanup for every framework.'
-  
-  c.action do |args, _|
+  c.option '--orphans'
+  c.action do |args, options|
     frameworks = Cint::Cleanup.frameworks
     error "There are not a single framework found. Check directory, it should be ran in Build/* directory." if frameworks.empty?
-    if args.empty?
-      filtered_frameworks = frameworks
-    else
-      filtered_frameworks = frameworks.select do |framework|
-        name = File.basename(framework)
-        args.include?(name)
-      end
-    end
-    warning "Nothing to precess" if filtered_frameworks.empty?
     
-    progress(filtered_frameworks) do |framework|
-      puts "Processing #{framework}...".green
-      Cint::Cleanup.bcsymbolmap(framework).each do |bcs|
-        if File.exists?(bcs)
-          print "\tRemoving #{bcs}".red
-          File.delete(bcs)
-        end
-        $stdout.flush
-      end
+    if options.orphans
+      cleanup_orphaned_symbols(frameworks)
+    else
+      cleanup_symbols(frameworks, args)
     end
   end
 end
