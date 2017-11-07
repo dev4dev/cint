@@ -40,19 +40,6 @@ SDK_TO_PLATFORM = {
 
 PLATFORMS = %w(iOS Mac watchOS tvOS).freeze
 
-# Carthage
-class CarthageFiles
-  def self.exists
-    Dir.exist? './Carthage/Build'
-  end
-
-  def self.frameworks(platform)
-    return [] unless PLATFORMS.include?(platform)
-    pattern = "./Carthage/Build/#{platform}/*.framework"
-    Dir.glob(pattern)
-  end
-end
-
 def prepare_inputs(frameworks)
   frameworks.map do |f|
     "$(SRCROOT)#{f[1..-1]}"
@@ -107,7 +94,7 @@ end
 
 def intergate_frameworks(target, project)
   platform = SDK_TO_PLATFORM[target.sdk]
-  frameworks = CarthageFiles.frameworks(platform)
+  frameworks = Cint::CarthageFiles.frameworks(platform)
 
   if frameworks.empty?
     warning 'No frameworks found'
@@ -138,7 +125,7 @@ command :install do |c|
   c.syntax = 'cint install <project_name>'
   c.description = 'Adds frameworks built by Carthage into a project'
   c.action do |args, _|
-    error 'Carthage build folder does not exists' unless CarthageFiles.exists
+    error 'Carthage build folder does not exists' unless Cint::CarthageFiles.exists
 
     # Choose Project
     project_name = get_project_name(args)
