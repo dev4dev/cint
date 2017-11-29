@@ -186,18 +186,24 @@ def cleanup_symbols(frameworks, args)
   end
 end
 
-command :cleanup do |c|
-  c.syntax = 'cint cleanup [framework,...]'
-  c.description = 'Remove bcsymbolmap files for frameworks. If no parameters passed it will perform cleanup for every framework.'
-  c.option '--orphans'
+command :ocleanup do |c|
+  c.syntax = 'cint ocleanup'
+  c.description = 'Remove orphaned bcsymbolmap files'
   c.action do |args, options|
     frameworks = Cint::Cleanup.frameworks
     error "There are not a single framework found. Check directory, it should be ran in Build/* directory." if frameworks.empty?
     
-    if options.orphans
-      cleanup_orphaned_symbols(frameworks)
-    else
-      cleanup_symbols(frameworks, args)
-    end
+    cleanup_orphaned_symbols(frameworks)
+  end
+end
+
+command :cleanup do |c|
+  c.syntax = 'cint cleanup framework...'
+  c.description = 'Remove bcsymbolmap files for frameworks. If no parameters passed it will perform cleanup for every found framework.'
+  c.action do |args, options|
+    frameworks = Cint::Cleanup.frameworks
+    error "There are not a single framework found. Check directory, it should be ran in Build/* directory." if frameworks.empty?
+    
+    cleanup_symbols(frameworks, args)
   end
 end
