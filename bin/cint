@@ -111,10 +111,12 @@ def intergate_frameworks(target, project)
   project.add_path(fw_search_path)
 
   # Integrate Shell Script
-  phase = target.carthage_build_phase
-  prepared_inputs = prepare_inputs(frameworks)
-  prepared_outputs = prepare_outputs(frameworks)
-  phase.setup_with_frameworks(prepared_inputs, prepared_outputs) unless target.sdk == 'macosx'
+  if target.sdk != 'macosx'
+    phase = target.carthage_build_phase
+    prepared_inputs = prepare_inputs(frameworks)
+    prepared_outputs = prepare_outputs(frameworks)
+    phase.setup_with_frameworks(prepared_inputs, prepared_outputs)
+  end
   
   # footer
   say "\n"
