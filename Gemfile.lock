@@ -4,50 +4,50 @@ PATH
     cint (0.2.3)
       colored (~> 1.2)
       commander (~> 4.4)
-      xcodeproj (~> 1.5.2)
+      xcodeproj (~> 1.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    CFPropertyList (3.0.0)
-    atomos (0.1.2)
-    claide (1.0.2)
+    CFPropertyList (3.0.1)
+    atomos (0.1.3)
+    claide (1.0.3)
     colored (1.2)
     colored2 (3.1.2)
-    commander (4.4.4)
-      highline (~> 1.7.2)
+    commander (4.4.7)
+      highline (~> 2.0.0)
     diff-lcs (1.3)
-    highline (1.7.10)
-    nanaimo (0.2.5)
-    rake (12.3.1)
-    rspec (3.7.0)
-      rspec-core (~> 3.7.0)
-      rspec-expectations (~> 3.7.0)
-      rspec-mocks (~> 3.7.0)
-    rspec-core (3.7.1)
-      rspec-support (~> 3.7.0)
-    rspec-expectations (3.7.0)
+    highline (2.0.2)
+    nanaimo (0.2.6)
+    rake (12.3.3)
+    rspec (3.8.0)
+      rspec-core (~> 3.8.0)
+      rspec-expectations (~> 3.8.0)
+      rspec-mocks (~> 3.8.0)
+    rspec-core (3.8.2)
+      rspec-support (~> 3.8.0)
+    rspec-expectations (3.8.4)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.7.0)
-    rspec-mocks (3.7.0)
+      rspec-support (~> 3.8.0)
+    rspec-mocks (3.8.1)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.7.0)
-    rspec-support (3.7.1)
-    xcodeproj (1.5.7)
+      rspec-support (~> 3.8.0)
+    rspec-support (3.8.2)
+    xcodeproj (1.12.0)
       CFPropertyList (>= 2.3.3, < 4.0)
-      atomos (~> 0.1.2)
+      atomos (~> 0.1.3)
       claide (>= 1.0.2, < 2.0)
       colored2 (~> 3.1)
-      nanaimo (~> 0.2.4)
+      nanaimo (~> 0.2.6)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.11)
+  bundler (>= 1.12.0)
   cint!
   rake (~> 12.1)
   rspec (~> 3.0)
 
 BUNDLED WITH
-   1.16.1
+   2.0.2
