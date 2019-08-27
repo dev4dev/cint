@@ -1,4 +1,3 @@
-
 module Cint
   class CarthageFiles
     def self.exists
