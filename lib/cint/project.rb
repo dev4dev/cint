@@ -1,4 +1,3 @@
-
 module Cint
 
   # Project
@@ -16,7 +15,7 @@ module Cint
     def target_by_name(name)
       @project.targets.find { |t| t.name == name }
     end
-    
+
     def add_path(path)
       @project.add_frameworks_search_path(path)
     end
@@ -32,14 +31,14 @@ module Cint
           file = @project.frameworks_group.new_file(f) if file.nil?
           added_frameworks << f
         end
-        
+
         file
       end
 
       files.each do |f|
         target.frameworks_build_phase.add_file_reference(f)
       end
-      
+
       return added_frameworks
     end
 

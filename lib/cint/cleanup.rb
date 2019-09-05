@@ -1,14 +1,13 @@
-
 module Cint
   class Cleanup
     def self.frameworks
       Dir.glob("*.framework")
     end
-    
+
     def self.all_bcsymbolmap
       Dir.glob("*.bcsymbolmap")
     end
-    
+
     def self.bcsymbolmap(framework_path)
       name = File.basename(framework_path, ".framework")
       path = framework_path + "/#{name}"

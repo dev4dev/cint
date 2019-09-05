@@ -7,7 +7,6 @@ $:.unshift(ROOT)
 require 'xcodeproj'
 require 'colored'
 require 'commander/import'
-require 'lib/xcodeproj'
 require 'lib/cint'
 
 program :name, 'Carthage Integrator'
@@ -58,10 +57,10 @@ end
 def print_report(target, all, integrated)
   all.map! { |f| File.basename(f) }
   integrated.map! { |f| File.basename(f) }
-  
+
   puts "Target ".green + target.name.yellow
   puts
-  
+
   old = all - integrated
   unless old.empty?
     info 'Existed:'
@@ -117,7 +116,7 @@ def intergate_frameworks(target, project)
     prepared_outputs = prepare_outputs(frameworks)
     phase.setup_with_frameworks(prepared_inputs, prepared_outputs)
   end
-  
+
   # footer
   say "\n"
   print_report(target, frameworks, added_frameworks)
@@ -140,10 +139,10 @@ command :install do |c|
     # choose target
     choice = choose("Choose target:\n", *project.targets.map(&:name))
     target = project.target_by_name(choice)
-    
+
     # integrate
     intergate_frameworks(target, project)
-    
+
     # Save Project
     project.save
 
@@ -157,7 +156,7 @@ def cleanup_orphaned_symbols(frameworks)
   end
   all = Cint::Cleanup.all_bcsymbolmap
   orphans = all - used_symbols
-  
+
   warning "There are no orphan symbols" if orphans.empty?
   orphans.each_with_index do |symb, index|
     puts "(#{index + 1}/#{orphans.count}) Removing #{symb}...".red
@@ -175,7 +174,7 @@ def cleanup_symbols(frameworks, args)
     end
   end
   warning "Nothing to precess" if filtered_frameworks.empty?
-  
+
   progress(filtered_frameworks) do |framework|
     puts "Processing #{framework}...".green
     Cint::Cleanup.bcsymbolmap(framework).each do |bcs|
@@ -194,7 +193,7 @@ command :ocleanup do |c|
   c.action do |args, options|
     frameworks = Cint::Cleanup.frameworks
     error "There are not a single framework found. Check directory, it should be ran in Build/* directory." if frameworks.empty?
-    
+
     cleanup_orphaned_symbols(frameworks)
   end
 end
@@ -205,7 +204,7 @@ command :cleanup do |c|
   c.action do |args, options|
     frameworks = Cint::Cleanup.frameworks
     error "There are not a single framework found. Check directory, it should be ran in Build/* directory." if frameworks.empty?
-    
+
     cleanup_symbols(frameworks, args)
   end
 end

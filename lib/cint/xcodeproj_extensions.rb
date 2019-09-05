@@ -1,6 +1,5 @@
-
-module Xcodeproj
-  class Project
+module XcodeprojExtensions
+  module Project
     def add_frameworks_search_path(path)
       build_configuration_list.build_configurations.each do |cfg|
         if cfg.build_settings['FRAMEWORK_SEARCH_PATHS'] && !cfg.build_settings['FRAMEWORK_SEARCH_PATHS'].include?(path)
@@ -17,7 +16,7 @@ module Xcodeproj
 
     module Object
       # Extends Target
-      class PBXNativeTarget
+      module PBXNativeTarget
         def carthage_build_phase
           cart_phase = build_phases.find do |phase|
             phase.is_a?(Xcodeproj::Project::Object::PBXShellScriptBuildPhase) && phase.name == BUILD_PHASE_NAME
@@ -27,7 +26,7 @@ module Xcodeproj
       end
 
       # Extends Build Phase
-      class PBXShellScriptBuildPhase
+      module PBXShellScriptBuildPhase
         def setup_with_frameworks(input_paths, output_paths)
           self.shell_script = '/usr/local/bin/carthage copy-frameworks'
           self.shell_path = '/bin/sh'
