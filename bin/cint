@@ -94,8 +94,8 @@ def get_project_name(args)
   project_name
 end
 
-def intergate_frameworks(target, project)
-  platform = SDK_TO_PLATFORM[target.sdk]
+def intergate_frameworks(target, project, use_platform)
+  platform = use_platform ? SDK_TO_PLATFORM[target.sdk] : ''
   frameworks = Cint::CarthageFiles.frameworks(platform)
 
   if frameworks.empty?
@@ -107,7 +107,7 @@ def intergate_frameworks(target, project)
   added_frameworks = project.add_missing_frameworks_to_target(target, frameworks)
 
   # Add Frameworks Search Path (FRAMEWORK_SEARCH_PATHS)
-  fw_search_path = "$(PROJECT_DIR)/Carthage/Build/#{platform}"
+  fw_search_path = "$(PROJECT_DIR)/Carthage/Build" + (platform.empty? ? '' : "/#{platform}")
   project.add_path(fw_search_path)
 
   # Integrate Shell Script
@@ -128,7 +128,9 @@ end
 command :install do |c|
   c.syntax = 'cint install <project_name>'
   c.description = 'Adds frameworks built by Carthage into a project'
-  c.action do |args, _|
+  c.option '--no-platform', 'Do not search in platform sub-directory'
+  c.action do |args, options|
+    use_platform = options.no_platform == nil
     error 'Carthage build folder does not exists' unless Cint::CarthageFiles.exists
 
     # Choose Project
@@ -142,7 +144,7 @@ command :install do |c|
     target = project.target_by_name(choice)
     
     # integrate
-    intergate_frameworks(target, project)
+    intergate_frameworks(target, project, use_platform)
     
     # Save Project
     project.save

@@ -6,8 +6,12 @@ module Cint
     end
 
     def self.frameworks(platform)
-      return [] unless PLATFORMS.include?(platform)
-      pattern = "./Carthage/Build/#{platform}/*.framework"
+      if platform.empty?
+        pattern = "./Carthage/Build/*.{framework,xcframework}"
+      else
+        return [] unless PLATFORMS.include?(platform)
+        pattern = "./Carthage/Build/#{platform}/*.{framework,xcframework}"
+      end
       Dir.glob(pattern)
     end
   end

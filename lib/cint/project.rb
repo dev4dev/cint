@@ -1,4 +1,3 @@
-
 module Cint
 
   # Project
@@ -22,8 +21,9 @@ module Cint
     end
 
     def add_missing_frameworks_to_target(target, frameworks)
+      
       fs = _fix_frameworks_paths(frameworks)
-      fs -= target.frameworks_build_phase.files.map { |f| f.file_ref.path }
+      fs -= target.frameworks_build_phase.files.map(&:file_ref).select { |ref| !ref.nil? }.map { |f| f.path }
 
       added_frameworks = []
       files = fs.map do |f|
